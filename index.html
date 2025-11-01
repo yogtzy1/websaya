@@ -1,228 +1,203 @@
-<!-- detail.html -->
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detail Kode - CodeSyntax.pro</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/detail.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Biodata Profesional - Hendra Prayogi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif;}
+    body {
+      background: radial-gradient(circle at top, #0b0b1c, #111130, #1a1a3f);
+      color: #f0f0f0;
+      overflow-x: hidden;
+    }
+
+    header {
+      text-align: center;
+      padding: 120px 20px 60px;
+      position: relative;
+      animation: fadeIn 1.5s ease-in-out;
+    }
+
+    .welcome-message {
+      font-size: 1.8em;
+      color: #00e0ff;
+      margin-bottom: 25px;
+      font-weight: 700;
+      animation: fadeSlide 1.5s ease-in-out;
+      letter-spacing: 0.6px;
+      text-shadow: 0 0 15px rgba(0,224,255,0.6);
+    }
+
+    .profile-pic {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 3px solid rgba(0,200,255,0.8);
+      box-shadow: 0 0 40px rgba(0, 200, 255, 0.4);
+      margin: 0 auto 25px;
+      transition: transform 0.4s ease;
+    }
+
+    .profile-pic:hover { transform: scale(1.05); }
+
+    .profile-pic img { width: 100%; height: 100%; object-fit: cover; }
+
+    h1 {
+      font-size: 2.6em;
+      color: #00c8ff;
+      font-weight: 700;
+      margin-top: 10px;
+    }
+
+    p.subtitle {
+      color: #b5b5b5;
+      font-size: 1.1em;
+      margin-top: 8px;
+    }
+
+    .biodata {
+      max-width: 800px;
+      margin: 60px auto;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px 40px;
+      animation: fadeUp 1.5s ease-in-out;
+    }
+
+    .biodata-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .biodata-item:hover {
+      transform: translateX(8px);
+    }
+
+    .biodata-item i {
+      color: #00c8ff;
+      font-size: 1.6em;
+      margin-top: 2px;
+    }
+
+    .biodata-item div strong {
+      display: block;
+      color: #00c8ff;
+      font-size: 1em;
+    }
+
+    .biodata-item div span {
+      color: #eaeaea;
+      font-size: 0.95em;
+    }
+
+    section.info-tkj, section.kelebihan {
+      max-width: 900px;
+      margin: 60px auto;
+      padding: 30px 20px;
+      text-align: center;
+      animation: fadeUp 1.5s ease-in-out;
+    }
+
+    section.info-tkj h2, section.kelebihan h2 {
+      color: #00c8ff;
+      margin-bottom: 20px;
+      font-size: 1.8em;
+    }
+
+    section.info-tkj p, section.kelebihan p {
+      color: #d8d8d8;
+      font-size: 1.05em;
+      line-height: 1.6em;
+    }
+
+    .button-section {
+      text-align: center;
+      margin: 60px 0;
+    }
+
+    .button-section button {
+      background: linear-gradient(90deg, #00c8ff, #007aff);
+      border: none;
+      color: #fff;
+      font-weight: 600;
+      padding: 14px 32px;
+      border-radius: 30px;
+      margin: 10px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .button-section button:hover {
+      box-shadow: 0 0 25px rgba(0,200,255,0.6);
+      transform: translateY(-4px);
+    }
+
+    footer {
+      text-align: center;
+      padding: 40px 20px;
+      color: #999;
+      font-size: 0.9em;
+    }
+
+    @keyframes fadeUp { from {opacity: 0; transform: translateY(30px);} to {opacity: 1; transform: translateY(0);} }
+    @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
+    @keyframes fadeSlide { from {opacity: 0; transform: translateY(-20px);} to {opacity: 1; transform: translateY(0);} }
+  </style>
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
 <body>
+  <audio id="bgMusic" src="https://files.catbox.moe/xf1f00.mp3" loop></audio>
 
-    <header>
-        <div class="container">
-            <a href="index.html" style="text-decoration: none; color: white;">
-                <h1>CodeSyntax<span style="color: #4dabf7;">.pro</span></h1>
-            </a>
-            <p>Detail Kode</p>
-            <button id="theme-toggle" class="theme-toggle-btn">🌙 Mode Gelap</button>
-        </div>
-    </header>
+  <header>
+    <div class="welcome-message">Selamat datang di ruang digital saya — <span>tempat di mana kreativitas bertemu dengan teknologi.</span></div>
+    <div class="profile-pic">
+      <img src="https://files.catbox.moe/ei4bbp.jpg" alt="Foto Profil Hendra">
+    </div>
+    <h1>Hendra Prayogi</h1>
+    <p class="subtitle">Pelajar TKJ | Web Developer & UI Designer</p>
+  </header>
 
-    <main class="container">
-        <button id="back-button" class="back-btn">← Kembali ke Galeri</button>
-        <section id="code-detail-container">
-            <!-- Konten detail akan dimuat secara dinamis -->
-        </section>
-    </main>
+  <section class="biodata">
+    <div class="biodata-item"><i class="fas fa-user"></i><div><strong>Nama Lengkap</strong><span>Hendra Prayogi</span></div></div>
+    <div class="biodata-item"><i class="fas fa-birthday-cake"></i><div><strong>Tempat, Tanggal Lahir</strong><span>Pringsewu, 2 April 2007</span></div></div>
+    <div class="biodata-item"><i class="fas fa-map-marker-alt"></i><div><strong>Alamat</strong><span>Pringsewu, Lampung</span></div></div>
+    <div class="biodata-item"><i class="fas fa-school"></i><div><strong>Asal Sekolah</strong><span>SMK Muhammadiyah 1 Pringsewu</span></div></div>
+    <div class="biodata-item"><i class="fas fa-laptop-code"></i><div><strong>Jurusan</strong><span>Teknik Komputer dan Jaringan (TKJ)</span></div></div>
+  </section>
 
-    <footer>
-        <div class="container">
-            <p>&copy; 2024 CodeSyntax.pro. Dibuat dengan ❤️ oleh GLM-4.6.</p>
-        </div>
-    </footer>
+  <section class="info-tkj">
+    <h2>Tentang Jurusan TKJ</h2>
+    <p>Jurusan Teknik Komputer dan Jaringan (TKJ) merupakan bidang yang mempelajari konfigurasi jaringan, perakitan komputer, serta manajemen sistem operasi dan server. TKJ membentuk kemampuan analitis dan praktis yang sangat dibutuhkan dalam dunia digital modern.</p>
+  </section>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
-    <script src="data/code-data.js"></script>
-    <script src="js/detail.js"></script>
-</body>
-</html>'html':'css');
-  const blob=new Blob([content],{type:'text/plain'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download=name.includes('.')?name:`${name}.${ext}`;
-  a.click();
-  URL.revokeObjectURL(a.href);
-  analysisDiv.textContent='Downloaded: '+name;
-});
+  <section class="kelebihan">
+    <h2>Kelebihan Website Ini</h2>
+    <p>Website ini dirancang dengan desain yang elegan, animasi lembut, serta tata letak responsif yang menyesuaikan berbagai ukuran layar. Setiap elemen dibuat dengan perhatian terhadap detail untuk menciptakan kesan profesional dan futuristik bagi pengunjung.</p>
+  </section>
 
-langSelect.addEventListener('change',e=>setMode(e.target.value));
-setMode('javascript');
-</script>
+  <div class="button-section">
+    <button onclick="window.open('https://wa.me/6285762184102','_blank')">Hubungi via WhatsApp</button>
+    <button onclick="window.open('mailto:yogiigaming90@gmail.com','_blank')">Email Saya</button>
+    <button onclick="window.open('https://instagram.com/yogiiii._','_blank')">Instagram</button>
+    <button onclick="music.play()">Putar Musik</button>
+  </div>
+
+  <footer>© 2025 Hendra Prayogi. All Rights Reserved.</footer>
+
+  <script>
+    const music = document.getElementById('bgMusic');
+    window.addEventListener('click', () => music.play(), { once: true });
+  </script>
 </body>
 </html>
-"minor mt-1">Saran: ${escapeHtml(it.suggestion || 'Periksa baris yang disebut.')}</div>`;
-    issuesDiv.appendChild(el);
-  });
-}
-function escapeHtml(s){ return (s||'').toString().replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-function setMode(lang) {
-  currentLang = lang;
-  if (lang === 'javascript') cm.setOption('mode','javascript');
-  else if (lang === 'html') cm.setOption('mode','htmlmixed');
-  else if (lang === 'css') cm.setOption('mode','css');
-  else if (lang === 'python') cm.setOption('mode','python');
-  else if (lang === 'cpp') cm.setOption('mode','text/x-c++src');
-  langSelect.value = lang;
-  document.title = `Ndraa Syntax — ${lang.toUpperCase()}`;
-}
-
-/* ========= Auto-save (localStorage) ========= */
-function saveDraft() {
-  const payload = {
-    lang: currentLang,
-    filename: filenameInput.value || 'untitled',
-    content: cm.getValue(),
-    ts: Date.now()
-  };
-  try { localStorage.setItem(autosaveKey, JSON.stringify(payload)); document.getElementById('autosaveStatus').textContent = 'On'; }
-  catch(e) { document.getElementById('autosaveStatus').textContent = 'Err'; }
-}
-function loadDraft() {
-  try {
-    const raw = localStorage.getItem(autosaveKey);
-    if (!raw) return;
-    const p = JSON.parse(raw);
-    setMode(p.lang || 'javascript');
-    filenameInput.value = p.filename || 'untitled';
-    cm.setValue(p.content || '');
-    pushHistory('Loaded draft from localStorage');
-  } catch(e){}
-}
-/* save every 4 seconds while typing */
-let saveTimer = null;
-cm.on('change', ()=> {
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(saveDraft, 1000 * 4);
-});
-
-/* load draft on init */
-loadDraft();
-
-/* ========= Upload file handling ========= */
-fileInput.addEventListener('change', async (ev)=>{
-  const files = Array.from(ev.target.files || []);
-  if (!files.length) return;
-  const f = files[0];
-  filenameInput.value = f.name;
-  const text = await f.text();
-  cm.setValue(text);
-  // detect by extension
-  const ext = f.name.split('.').pop().toLowerCase();
-  const mapping = { js:'javascript', jsx:'javascript', html:'html', htm:'html', css:'css', py:'python', c:'cpp', cpp:'cpp', h:'cpp' };
-  setMode(mapping[ext] || 'javascript');
-  pushHistory(`Uploaded ${f.name}`);
-});
-
-/* ========= Templates ========= */
-document.querySelectorAll('.templateBtn').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    const t = btn.textContent.trim();
-    if (t.includes('JS')) {
-      setMode('javascript'); filenameInput.value='template.js';
-      cm.setValue(`// JS Template\nfunction main(){\n  console.log("Hello from Ndraa Syntax");\n}\nmain();`);
-    } else if (t.includes('HTML')) {
-      setMode('html'); filenameInput.value='template.html';
-      cm.setValue(`<!doctype html>\n<html>\n  <head>\n    <meta charset="utf-8">\n    <title>Template</title>\n  </head>\n  <body>\n    <h1>Ndraa Syntax HTML Template</h1>\n  </body>\n</html>`);
-    } else if (t.includes('CSS')) {
-      setMode('css'); filenameInput.value='template.css';
-      cm.setValue(`/* CSS Template */\n:root{--accent:#7c3aed}\nbody{font-family:Inter,system-ui; background:#0b1220;color:#e6eef8}`);
-    } else if (t.includes('Python')) {
-      setMode('python'); filenameInput.value='template.py';
-      cm.setValue(`# Python template\nprint("Hello Ndraa Syntax")`);
-    } else if (t.includes('C++')) {
-      setMode('cpp'); filenameInput.value='template.cpp';
-      cm.setValue(`#include <iostream>\nusing namespace std;\nint main(){ cout << "Hello"; return 0; }`);
-    }
-    pushHistory(`Inserted ${t}`);
-  });
-});
-
-/* ========= Analysis / Lint (lightweight) ========= */
-async function analyze(code, lang) {
-  const issues = [];
-  try {
-    if (lang === 'javascript') {
-      try {
-        // try parse with esprima to catch syntax error
-        esprima.parseScript(code, { tolerant: true, loc: true });
-      } catch (err) {
-        issues.push({ title: 'SyntaxError (JS)', message: err.description || err.message, line: err.lineNumber, col: err.column, severity:'error', suggestion:'Periksa tanda kurung/quote/token sebelum lokasi.'});
-      }
-      // heuristics
-      if (code.includes('console,log')) issues.push({ title:'Typo', message:'console,log — kemungkinan maksud console.log', severity:'warn', suggestion:'Ganti menjadi console.log' });
-    } else if (lang === 'html') {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(code, 'text/html');
-      const errEl = doc.querySelector('parsererror');
-      if (errEl) issues.push({ title:'Malformed HTML', message: errEl.textContent.slice(0,300), severity:'error', suggestion:'Periksa tag yang terbuka/tertutup.'});
-    } else if (lang === 'css') {
-      const open = (code.match(/{/g)||[]).length;
-      const close = (code.match(/}/g)||[]).length;
-      if (open !== close) issues.push({ title:'Unmatched Braces (CSS)', message:`{ count=${open} } count=${close}`, severity:'error', suggestion:'Pastikan setiap { memiliki }.'});
-    } else if (lang === 'python') {
-      const lines = code.split('\n');
-      for (let i=0;i<lines.length;i++){
-        if (/^\t+/.test(lines[i])) { issues.push({ title:'Indentation (Python)', message:'Tab detected. Disarankan gunakan spasi (4).', line:i+1, severity:'warn', suggestion:'Ganti tab dengan 4 spasi.'}); break; }
-      }
-      // bracket / parenthesis basic
-      const openP = (code.match(/\(/g)||[]).length;
-      const closeP = (code.match(/\)/g)||[]).length;
-      if (openP !== closeP) issues.push({ title:'Parenthesis mismatch', message:`(=${openP} )=${closeP}`, severity:'warn', suggestion:'Periksa tanda kurung.'});
-    } else if (lang === 'cpp') {
-      const lines = code.split('\n');
-      let cnt=0;
-      for (let i=0;i<lines.length && cnt<15;i++){
-        const ln = lines[i].trim();
-        if (!ln) continue;
-        if (/^(#|\/\/|\/\*|\*|\}|\{)/.test(ln)) continue;
-        if (!/;$/.test(ln) && !/\)$/.test(ln) && !/^\b(if|for|while|switch|class|struct|template|namespace)\b/.test(ln)) {
-          issues.push({ title:'Possible missing semicolon', line:i+1, message:'Baris ini mungkin butuh ; di akhir', severity:'warn', suggestion:'Tambahkan ; jika pernyataan ekspresi.'});
-          cnt++;
-        }
-      }
-    }
-  } catch (e) {
-    issues.push({ title:'Analyzer Error', message: e.message, severity:'error' });
-  }
-  return issues;
-}
-
-/* ========= Auto-fix (Prettier for js/html/css; heuristics for py/cpp) ========= */
-async function autoFix(code, lang) {
-  let fixed = code;
-  const messages = [];
-  let fixesApplied = 0;
-  try {
-    if (lang === 'javascript') {
-      fixed = prettier.format(code, { parser: "babel", plugins: prettierPlugins });
-      messages.push('Prettier applied (babel).');
-      fixesApplied++;
-    } else if (lang === 'html') {
-      fixed = prettier.format(code, { parser: "html", plugins: prettierPlugins });
-      messages.push('Prettier applied (html).');
-      fixesApplied++;
-    } else if (lang === 'css') {
-      fixed = prettier.format(code, { parser: "css", plugins: prettierPlugins });
-      messages.push('Prettier applied (css).');
-      fixesApplied++;
-    } else if (lang === 'python') {
-      // heuristics: tabs -> 4 spaces; trim trailing; basic parentheses balancing
-      fixed = code.split('\n').map(l=>l.replace(/\t/g,'    ').replace(/\s+$/,'')).join('\n');
-      messages.push('Tabs converted to 4 spaces; trailing spaces trimmed.');
-      fixesApplied++;
-      const open = (fixed.match(/\(/g)||[]).length;
-      const close = (fixed.match(/\)/g)||[]).length;
-      if (open > close) { fixed += '\n' + ')'.repeat(open - close); messages.push('Attempted to close extra parentheses.'); fixesApplied++; }
-    } else if (lang === 'cpp') {
-      // heuristic semicolon insertion for likely statements
-      const lines = fixed.split('\n');
+st lines = fixed.split('\n');
       let cnt = 0;
       for (let i=0;i<lines.length;i++){
         const raw = lines[i];
