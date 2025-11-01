@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Ndraa Syntax — Professional</title>
+
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- CodeMirror 5 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/xml/xml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/css/css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/clike/clike.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/matchbrackets.min.js"></script>
+
+<!-- Esprima (JS parse) -->
+<script src="https://cdn.jsdelivr.net/npm/esprima@4.0.1/dist/esprima.min.js"></script>
+
+<!-- Prettier standalone + parsers -->
+<script src="https://unpkg.com/prettier@2.8.8/standalone.js"></script>
+<script src="https://unpkg.com/prettier@2.8.8/parser-babel.js"></script>
+<script src="https://unpkg.com/prettier@2.8.8/parser-html.js"></script>
+<script src="https://unpkg.com/prettier@2.8.8/parser-postcss.js"></script>
+
+<style>
+  html,body,#app { height: 100%; }
+  body {
+    font-family: Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+    background: linear-gradient(135deg,#071024 0%, #0b1220 60%);
+    color: #e6eef8;
+  }
+  .glass { background: rgba(255,255,255,0.04); backdrop-filter: blur(6px); border-radius: 10px; box-shadow: 0 6px 18px rgba(2,6,23,0.6); }
+  .cm-wrapper .CodeMirror { height: calc(70vh - 120px); border-radius: 8px; }
+  @media (max-width: 900px) {
+    .cm-wrapper .CodeMirror { height: 40vh; }
+    main { flex-direction: column; }
+  }
+  .badge-error { color: #fecaca; background: rgba(255,99,71,0.06); padding: 6px 8px; border-radius: 6px; font-weight:600; }
+  .badge-warn { color: #fef08a; background: rgba(250,204,21,0.06); padding: 6px 8px; border-radius: 6px; font-weight:600; }
+  .minor { color:#94a3b8; font-size:0.85rem; }
+</style>
+</head>
+<body>
+  <div id="app" class="min-h-screen flex flex-col">
+    <!-- Top bar -->
+    <header class="flex items-center justify-between p-4 glass m-4">
+      <div class="flex items-center gap-4">
+        <div class="text-lg font-bold bg-clip-text text-transparent" style="background:linear-gradient(90deg,#7c3aed,#06b6d4)">Ndraa Syntax</div>
+        <div class="minor">Professional Editor • Syntax Check • Auto Fix</div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button id="themeBtn" class="px-3 py-1 rounded-md glass">🌙</button>
+        <a href="https://whatsapp.com/channel/0029ValNqnPDOQIWQjHK6R0v" target="_blank" class="px-3 py-1 rounded-md bg-green-500 hover:bg-green-600">Owner</a>
+      </div>
+    </header>
+
+    <!-- Main -->
+    <main class="flex-1 flex gap-6 p-4">
+      <!-- Left column: sidebar -->
+      <aside class="w-72 glass p-4 flex-shrink-0">
+        <div class="font-semibold mb-2">Workspace</div>
+
+        <label class="text-xs opacity-70">Language</label>
+        <select id="langSelect" class="w-full mt-2 p-2 bg-transparent border rounded">
+          <option value="javascript">JavaScript</option>
+          <option value="html">HTML</option>
+          <option value="css">CSS</option>
+          <option value="python">Python</option>
+          <option value="cpp">C / C++</option>
+        </select>
+
+        <div class="mt-4">
+          <label class="text-xs opacity-70">Upload</label>
+          <input id="fileInput" type="file" accept=".js,.jsx,.html,.htm,.css,.py,.cpp,.c,.h" multiple class="mt-2 text-xs w-full" />
+        </div>
+
+        <div class="mt-4 space-y-2">
+          <button id="checkBtn" class="w-full py-2 rounded bg-indigo-600 hover:bg-indigo-700">🔍 Check</button>
+          <button id="formatBtn" class="w-full py-2 rounded bg-emerald-500 hover:bg-emerald-600">⚙️ Auto Fix / Format</button>
+          <button id="applyFixBtn" class="w-full py-2 rounded bg-yellow-500 hover:bg-yellow-600">✅ Apply Fix</button>
+        </div>
+
+        <div class="mt-4">
+          <label class="text-xs opacity-70">Templates</label>
+          <div class="mt-2 grid gap-2">
+            <button class="templateBtn py-1 px-2 rounded bg-slate-700">JS Template</button>
+            <button class="templateBtn py-1 px-2 rounded bg-slate-700">HTML Template</button>
+            <button class="templateBtn py-1 px-2 rounded bg-slate-700">CSS Template</button>
+            <button class="templateBtn py-1 px-2 rounded bg-slate-700">Python Template</button>
+            <button class="templateBtn py-1 px-2 rounded bg-slate-700">C++ Template</button>
+          </div>
+        </div>
+
+        <div class="mt-4 text-xs minor">
+          <div>Auto-save draft: <span id="autosaveStatus">On</span></div>
+          <div class="mt-2">Quick tips:</div>
+          <ul class="list-disc ml-4 mt-1">
+            <li>Upload file otomatis pilih bahasa.</li>
+            <li>Prettier digunakan untuk JS/HTML/CSS formatting.</li>
+            <li>Python/C++ auto-fix: heuristik sederhana.</li>
+          </ul>
+        </div>
+      </aside>
+
+      <!-- Center: editor -->
+      <section class="flex-1 flex flex-col gap-4">
+        <div class="glass p-3 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <input id="filename" class="bg-transparent outline-none text-lg" value="untitled.js" />
+            <div class="minor">— edit nama file sebelum download</div>
+          </div>
+
+          <div class="flex gap-2">
+            <button id="copyBtn" class="px-3 py-1 rounded bg-indigo-500">Copy</button>
+            <button id="downloadBtn" class="px-3 py-1 rounded bg-blue-600">Download</button>
+            <button id="previewBtn" class="px-3 py-1 rounded bg-sky-600">Preview</button>
+          </div>
+        </div>
+
+        <div class="cm-wrapper glass p-3">
+          <textarea id="editor" style="display:none"></textarea>
+          <div id="cmEditor"></div>
+        </div>
+
+        <div class="flex gap-3">
+          <div class="flex-1 glass p-3">
+            <div class="font-semibold">Analysis / Preview</div>
+            <div id="analysis" class="mt-2 text-sm max-h-48 overflow-auto minor">Tekan "Check" untuk analisa syntax & suggestions.</div>
+          </div>
+          <div class="w-80 glass p-3">
+            <div class="font-semibold">Issues</div>
+            <div id="issues" class="mt-2 text-sm max-h-48 overflow-auto"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right: stats / history -->
+      <aside class="w-80 glass p-4">
+        <div class="flex items-center justify-between">
+          <div class="font-semibold">Stats</div>
+          <div class="minor">local</div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 mt-3">
+          <div class="p-3 bg-slate-800 rounded text-center">
+            <div id="statChecks" class="text-2xl">0</div>
+            <div class="minor">Checks</div>
+          </div>
+          <div class="p-3 bg-slate-800 rounded text-center">
+            <div id="statFixes" class="text-2xl">0</div>
+            <div class="minor">AutoFixes</div>
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <div class="font-semibold">History</div>
+          <ol id="history" class="mt-2 list-decimal ml-5 minor max-h-60 overflow-auto"></ol>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="text-center minor p-4">© 2025 Ndraa Syntax • Built for modern syntax workflows</footer>
+  </div>
+
+<script>
+/* ========= Init Editor (CodeMirror) ========= */
+const cm = CodeMirror(document.getElementById('cmEditor'), {
+  value: `// Selamat datang ke Ndraa Syntax\nconsole.log('Halo!');`,
+  mode: 'javascript',
+  theme: 'dracula',
+  lineNumbers: true,
+  matchBrackets: true,
+  tabSize: 2,
+  indentUnit: 2
+});
+
+/* ========= State & refs ========= */
+let currentLang = 'javascript';
+let lastFixed = '';
+const langSelect = document.getElementById('langSelect');
+const filenameInput = document.getElementById('filename');
+const fileInput = document.getElementById('fileInput');
+const issuesDiv = document.getElementById('issues');
+const analysisDiv = document.getElementById('analysis');
+const statChecks = document.getElementById('statChecks');
+const statFixes = document.getElementById('statFixes');
+const historyOL = document.getElementById('history');
+const autosaveKey = 'ndraa_syntax_draft_v1';
+
+/* Helpers */
+function pushHistory(txt) {
+  const li = document.createElement('li');
+  li.textContent = `${new Date().toLocaleTimeString()} — ${txt}`;
+  historyOL.prepend(li);
+  if (historyOL.children.length > 200) historyOL.removeChild(historyOL.lastChild);
+}
+function showAnalysis(msg) { analysisDiv.innerHTML = `<div class="minor">${escapeHtml(msg)}</div>`; }
+function showIssues(list) {
+  issuesDiv.innerHTML = '';
+  if (!list.length) { issuesDiv.innerHTML = '<div class="text-green-400">No issues found.</div>'; return; }
+  list.forEach(it=>{
+    const el = document.createElement('div');
+    el.className = 'p-2 mb-2 rounded bg-slate-900';
+    el.innerHTML = `<div class="${it.severity==='warn' ? 'badge-warn' : 'badge-error'}">${escapeHtml(it.title)}</div>
+      <div class="minor mt-1">Line: ${it.line||'-'} ${it.col? 'Col: '+it.col : ''}</div>
+      <div class="mt-1">${escapeHtml(it.message || it.suggestion || '')}</div>
+      <div class="minor mt-1">Saran: ${escapeHtml(it.suggestion || 'Periksa baris yang disebut.')}</div>`;
+    issuesDiv.appendChild(el);
+  });
+}
+function escapeHtml(s){ return (s||'').toString().replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function setMode(lang) {
+  currentLang = lang;
+  if (lang === 'javascript') cm.setOption('mode','javascript');
+  else if (lang === 'html') cm.setOption('mode','htmlmixed');
+  else if (lang === 'css') cm.setOption('mode','css');
+  else if (lang === 'python') cm.setOption('mode','python');
+  else if (lang === 'cpp') cm.setOption('mode','text/x-c++src');
+  langSelect.value = lang;
+  document.title = `Ndraa Syntax — ${lang.toUpperCase()}`;
+}
+
+/* ========= Auto-save (localStorage) ========= */
+function saveDraft() {
+  const payload = {
+    lang: currentLang,
+    filename: filenameInput.value || 'untitled',
+    content: cm.getValue(),
+    ts: Date.now()
+  };
+  try { localStorage.setItem(autosaveKey, JSON.stringify(payload)); document.getElementById('autosaveStatus').textContent = 'On'; }
+  catch(e) { document.getElementById('autosaveStatus').textContent = 'Err'; }
+}
+function loadDraft() {
+  try {
+    const raw = localStorage.getItem(autosaveKey);
+    if (!raw) return;
+    const p = JSON.parse(raw);
+    setMode(p.lang || 'javascript');
+    filenameInput.value = p.filename || 'untitled';
+    cm.setValue(p.content || '');
+    pushHistory('Loaded draft from localStorage');
+  } catch(e){}
+}
+/* save every 4 seconds while typing */
+let saveTimer = null;
+cm.on('change', ()=> {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveDraft, 1000 * 4);
+});
+
+/* load draft on init */
+loadDraft();
+
+/* ========= Upload file handling ========= */
+fileInput.addEventListener('change', async (ev)=>{
+  const files = Array.from(ev.target.files || []);
+  if (!files.length) return;
+  const f = files[0];
+  filenameInput.value = f.name;
+  const text = await f.text();
+  cm.setValue(text);
+  // detect by extension
+  const ext = f.name.split('.').pop().toLowerCase();
+  const mapping = { js:'javascript', jsx:'javascript', html:'html', htm:'html', css:'css', py:'python', c:'cpp', cpp:'cpp', h:'cpp' };
+  setMode(mapping[ext] || 'javascript');
+  pushHistory(`Uploaded ${f.name}`);
+});
+
+/* ========= Templates ========= */
+document.querySelectorAll('.templateBtn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const t = btn.textContent.trim();
+    if (t.includes('JS')) {
+      setMode('javascript'); filenameInput.value='template.js';
+      cm.setValue(`// JS Template\nfunction main(){\n  console.log("Hello from Ndraa Syntax");\n}\nmain();`);
+    } else if (t.includes('HTML')) {
+      setMode('html'); filenameInput.value='template.html';
+      cm.setValue(`<!doctype html>\n<html>\n  <head>\n    <meta charset="utf-8">\n    <title>Template</title>\n  </head>\n  <body>\n    <h1>Ndraa Syntax HTML Template</h1>\n  </body>\n</html>`);
+    } else if (t.includes('CSS')) {
+      setMode('css'); filenameInput.value='template.css';
+      cm.setValue(`/* CSS Template */\n:root{--accent:#7c3aed}\nbody{font-family:Inter,system-ui; background:#0b1220;color:#e6eef8}`);
+    } else if (t.includes('Python')) {
+      setMode('python'); filenameInput.value='template.py';
+      cm.setValue(`# Python template\nprint("Hello Ndraa Syntax")`);
+    } else if (t.includes('C++')) {
+      setMode('cpp'); filenameInput.value='template.cpp';
+      cm.setValue(`#include <iostream>\nusing namespace std;\nint main(){ cout << "Hello"; return 0; }`);
+    }
+    pushHistory(`Inserted ${t}`);
+  });
+});
+
+/* ========= Analysis / Lint (lightweight) ========= */
+async function analyze(code, lang) {
+  const issues = [];
+  try {
+    if (lang === 'javascript') {
+      try {
+        // try parse with esprima to catch syntax error
+        esprima.parseScript(code, { tolerant: true, loc: true });
+      } catch (err) {
+        issues.push({ title: 'SyntaxError (JS)', message: err.description || err.message, line: err.lineNumber, col: err.column, severity:'error', suggestion:'Periksa tanda kurung/quote/token sebelum lokasi.'});
+      }
+      // heuristics
+      if (code.includes('console,log')) issues.push({ title:'Typo', message:'console,log — kemungkinan maksud console.log', severity:'warn', suggestion:'Ganti menjadi console.log' });
+    } else if (lang === 'html') {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(code, 'text/html');
+      const errEl = doc.querySelector('parsererror');
+      if (errEl) issues.push({ title:'Malformed HTML', message: errEl.textContent.slice(0,300), severity:'error', suggestion:'Periksa tag yang terbuka/tertutup.'});
+    } else if (lang === 'css') {
+      const open = (code.match(/{/g)||[]).length;
+      const close = (code.match(/}/g)||[]).length;
+      if (open !== close) issues.push({ title:'Unmatched Braces (CSS)', message:`{ count=${open} } count=${close}`, severity:'error', suggestion:'Pastikan setiap { memiliki }.'});
+    } else if (lang === 'python') {
+      const lines = code.split('\n');
+      for (let i=0;i<lines.length;i++){
+        if (/^\t+/.test(lines[i])) { issues.push({ title:'Indentation (Python)', message:'Tab detected. Disarankan gunakan spasi (4).', line:i+1, severity:'warn', suggestion:'Ganti tab dengan 4 spasi.'}); break; }
+      }
+      // bracket / parenthesis basic
+      const openP = (code.match(/\(/g)||[]).length;
+      const closeP = (code.match(/\)/g)||[]).length;
+      if (openP !== closeP) issues.push({ title:'Parenthesis mismatch', message:`(=${openP} )=${closeP}`, severity:'warn', suggestion:'Periksa tanda kurung.'});
+    } else if (lang === 'cpp') {
+      const lines = code.split('\n');
+      let cnt=0;
+      for (let i=0;i<lines.length && cnt<15;i++){
+        const ln = lines[i].trim();
+        if (!ln) continue;
+        if (/^(#|\/\/|\/\*|\*|\}|\{)/.test(ln)) continue;
+        if (!/;$/.test(ln) && !/\)$/.test(ln) && !/^\b(if|for|while|switch|class|struct|template|namespace)\b/.test(ln)) {
+          issues.push({ title:'Possible missing semicolon', line:i+1, message:'Baris ini mungkin butuh ; di akhir', severity:'warn', suggestion:'Tambahkan ; jika pernyataan ekspresi.'});
+          cnt++;
+        }
+      }
+    }
+  } catch (e) {
+    issues.push({ title:'Analyzer Error', message: e.message, severity:'error' });
+  }
+  return issues;
+}
+
+/* ========= Auto-fix (Prettier for js/html/css; heuristics for py/cpp) ========= */
+async function autoFix(code, lang) {
+  let fixed = code;
+  const messages = [];
+  let fixesApplied = 0;
+  try {
+    if (lang === 'javascript') {
+      fixed = prettier.format(code, { parser: "babel", plugins: prettierPlugins });
+      messages.push('Prettier applied (babel).');
+      fixesApplied++;
+    } else if (lang === 'html') {
+      fixed = prettier.format(code, { parser: "html", plugins: prettierPlugins });
+      messages.push('Prettier applied (html).');
+      fixesApplied++;
+    } else if (lang === 'css') {
+      fixed = prettier.format(code, { parser: "css", plugins: prettierPlugins });
+      messages.push('Prettier applied (css).');
+      fixesApplied++;
+    } else if (lang === 'python') {
+      // heuristics: tabs -> 4 spaces; trim trailing; basic parentheses balancing
+      fixed = code.split('\n').map(l=>l.replace(/\t/g,'    ').replace(/\s+$/,'')).join('\n');
+      messages.push('Tabs converted to 4 spaces; trailing spaces trimmed.');
+      fixesApplied++;
+      const open = (fixed.match(/\(/g)||[]).length;
+      const close = (fixed.match(/\)/g)||[]).length;
+      if (open > close) { fixed += '\n' + ')'.repeat(open - close); messages.push('Attempted to close extra parentheses.'); fixesApplied++; }
+    } else if (lang === 'cpp') {
+      // heuristic semicolon insertion for likely statements
+      const lines = fixed.split('\n');
+      let cnt = 0;
+      for (let i=0;i<lines.length;i++){
+        const raw = lines[i];
+        const ln = raw.trim();
+        if (!ln) continue;
+        if (/^(#|\/\/|\/\*|\*|\}|\{)/.test(ln)) continue;
+        if (/;$/.test(ln)) continue;
+        if (!/\)$/.test(ln) && !/;|{|}$/.test(ln) && !/^\b(if|for|while|switch|class|struct|template|namespace)\b/.test(ln)) {
+          lines[i] = raw + ';'; cnt++; if (cnt > 200) break;
+        }
+      }
+      fixed = lines.join('\n');
+      if (cnt) { messages.push(`Inserted ${cnt} semicolon(s) heuristically.`); fixesApplied += cnt; }
+    }
+  } catch (e) {
+    messages.push('AutoFix error: ' + e.message);
+  }
+  return { fixed, fixesApplied, messages };
+}
+
+/* ========= Button behaviours ========= */
+document.getElementById('checkBtn').addEventListener('click', async ()=>{
+  const code = cm.getValue();
+  const list = await analyze(code, currentLang);
+  showIssues(list);
+  showAnalysis(list.length ? `${list.length} issue(s) found` : 'No issues. Looks good!');
+  statChecks.textContent = String(Number(statChecks.textContent||0) + 1);
+  pushHistory(`Check (${currentLang}) — ${list.length} issues`);
+});
+
+document.getElementById('formatBtn').addEventListener('click', async ()=>{
+  const code = cm.getValue();
+  const res = await autoFix(code, currentLang);
+  lastFixed = res.fixed;
+  let msg = `AutoFix done — changes: ${res.fixesApplied}. ${res.messages.join(' • ')}`;
+  showAnalysis(msg);
+  // preview fixed snippet
+  showIssues([]); // clear issues temporarily
+  const pre = document.createElement('pre'); pre.className='minor mt-2'; pre.textContent = res.fixed.slice(0, 10000);
+  analysisDiv.innerHTML = ''; analysisDiv.appendChild(document.createTextNode(msg)); analysisDiv.appendChild(pre);
+  statFixes.textContent = String(Number(statFixes.textContent||0) + (res.fixesApplied ? 1 : 0));
+  pushHistory(`AutoFix (${currentLang}) — ${res.fixesApplied} changes`);
+});
+
+document.getElementById('applyFixBtn').addEventListener('click', ()=>{
+  if (!lastFixed) { showAnalysis('No fixed result — run Auto Fix first.'); return; }
+  cm.setValue(lastFixed);
+  saveDraft();
+  pushHistory('Applied fix to editor');
+  showAnalysis('Fix applied to editor.');
+});
+
+document
