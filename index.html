@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Ndraa Syntax — Professional</title>
+<title>Ndraa Syntax Pro 2.1 — Ultimate IDE</title>
 
-<!-- Tailwind -->
+<!-- TailwindCSS -->
 <script src="https://cdn.tailwindcss.com"></script>
 
 <!-- CodeMirror 5 -->
@@ -16,202 +16,263 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/xml/xml.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/css/css.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/clike/clike.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/matchbrackets.min.js"></script>
 
-<!-- Esprima (JS parse) -->
+<!-- Linting & Formatting -->
 <script src="https://cdn.jsdelivr.net/npm/esprima@4.0.1/dist/esprima.min.js"></script>
-
-<!-- Prettier standalone + parsers -->
+<script src="https://cdn.jsdelivr.net/npm/htmlhint@0.13.1/dist/htmlhint.min.js"></script>
+<script src="https://unpkg.com/stylelint@15.14.0/dist/stylelint.umd.js"></script>
 <script src="https://unpkg.com/prettier@2.8.8/standalone.js"></script>
 <script src="https://unpkg.com/prettier@2.8.8/parser-babel.js"></script>
 <script src="https://unpkg.com/prettier@2.8.8/parser-html.js"></script>
 <script src="https://unpkg.com/prettier@2.8.8/parser-postcss.js"></script>
 
 <style>
-  html,body,#app { height: 100%; }
-  body {
-    font-family: Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
-    background: linear-gradient(135deg,#071024 0%, #0b1220 60%);
-    color: #e6eef8;
-  }
-  .glass { background: rgba(255,255,255,0.04); backdrop-filter: blur(6px); border-radius: 10px; box-shadow: 0 6px 18px rgba(2,6,23,0.6); }
-  .cm-wrapper .CodeMirror { height: calc(70vh - 120px); border-radius: 8px; }
-  @media (max-width: 900px) {
-    .cm-wrapper .CodeMirror { height: 40vh; }
-    main { flex-direction: column; }
-  }
-  .badge-error { color: #fecaca; background: rgba(255,99,71,0.06); padding: 6px 8px; border-radius: 6px; font-weight:600; }
-  .badge-warn { color: #fef08a; background: rgba(250,204,21,0.06); padding: 6px 8px; border-radius: 6px; font-weight:600; }
-  .minor { color:#94a3b8; font-size:0.85rem; }
+html,body,#app{height:100%;margin:0;font-family:Inter,system-ui;}
+body{background:linear-gradient(180deg,#071024 0%,#08102a 70%);color:#e6eef8;}
+header,footer{padding:10px 20px;}
+.glass{background:rgba(255,255,255,0.03);backdrop-filter:blur(6px);border-radius:8px;box-shadow:0 6px 20px rgba(2,6,23,0.6);}
+.cm-container .CodeMirror{height:calc(100vh - 250px);border-radius:6px;}
+.sidebar{width:260px;min-width:220px;}
+.btn{padding:6px 10px;border-radius:6px;font-weight:600;cursor:pointer;}
+.status-bar{padding:4px 10px;font-size:0.85rem;color:#94a3b8;display:flex;justify-content:space-between;}
+.issue-error{color:#f87171;font-weight:600;}
+.issue-warn{color:#facc15;font-weight:600;}
+.issue-info{color:#38bdf8;font-weight:600;}
 </style>
 </head>
 <body>
-  <div id="app" class="min-h-screen flex flex-col">
-    <!-- Top bar -->
-    <header class="flex items-center justify-between p-4 glass m-4">
-      <div class="flex items-center gap-4">
-        <div class="text-lg font-bold bg-clip-text text-transparent" style="background:linear-gradient(90deg,#7c3aed,#06b6d4)">Ndraa Syntax</div>
-        <div class="minor">Professional Editor • Syntax Check • Auto Fix</div>
-      </div>
-      <div class="flex items-center gap-3">
-        <button id="themeBtn" class="px-3 py-1 rounded-md glass">🌙</button>
-        <a href="https://whatsapp.com/channel/0029ValNqnPDOQIWQjHK6R0v" target="_blank" class="px-3 py-1 rounded-md bg-green-500 hover:bg-green-600">Owner</a>
-      </div>
-    </header>
+<div id="app" class="flex flex-col min-h-screen">
+<header class="glass flex items-center justify-between m-4">
+<div class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-cyan-400">Ndraa Syntax Pro 2.1</div>
+<a href="https://whatsapp.com/channel/0029ValNqnPDOQIWQjHK6R0v" target="_blank" class="btn bg-green-500">Owner</a>
+</header>
 
-    <!-- Main -->
-    <main class="flex-1 flex gap-6 p-4">
-      <!-- Left column: sidebar -->
-      <aside class="w-72 glass p-4 flex-shrink-0">
-        <div class="font-semibold mb-2">Workspace</div>
+<main class="flex flex-1 gap-4 px-4 pb-4">
+<aside class="sidebar glass p-4 flex flex-col gap-4">
+<label class="text-xs">Language</label>
+<select id="langSelect" class="p-2 bg-transparent border rounded">
+<option value="javascript">JavaScript</option>
+<option value="html">HTML</option>
+<option value="css">CSS</option>
+</select>
 
-        <label class="text-xs opacity-70">Language</label>
-        <select id="langSelect" class="w-full mt-2 p-2 bg-transparent border rounded">
-          <option value="javascript">JavaScript</option>
-          <option value="html">HTML</option>
-          <option value="css">CSS</option>
-          <option value="python">Python</option>
-          <option value="cpp">C / C++</option>
-        </select>
+<label class="text-xs mt-2">Upload file</label>
+<input id="fileInput" type="file" accept=".js,.jsx,.html,.htm,.css" class="mt-1 text-xs w-full" />
 
-        <div class="mt-4">
-          <label class="text-xs opacity-70">Upload</label>
-          <input id="fileInput" type="file" accept=".js,.jsx,.html,.htm,.css,.py,.cpp,.c,.h" multiple class="mt-2 text-xs w-full" />
-        </div>
+<div class="flex flex-col gap-2 mt-4">
+<button id="checkBtn" class="btn bg-indigo-600 text-white">🔍 Check</button>
+<button id="formatBtn" class="btn bg-emerald-500 text-white">⚙️ Auto Fix / Format</button>
+<button id="applyFixBtn" class="btn bg-yellow-500 text-white">✅ Apply Fix</button>
+</div>
+</aside>
 
-        <div class="mt-4 space-y-2">
-          <button id="checkBtn" class="w-full py-2 rounded bg-indigo-600 hover:bg-indigo-700">🔍 Check</button>
-          <button id="formatBtn" class="w-full py-2 rounded bg-emerald-500 hover:bg-emerald-600">⚙️ Auto Fix / Format</button>
-          <button id="applyFixBtn" class="w-full py-2 rounded bg-yellow-500 hover:bg-yellow-600">✅ Apply Fix</button>
-        </div>
+<section class="flex-1 flex flex-col gap-3">
+<div class="glass p-3 flex items-center justify-between">
+<input id="filename" class="bg-transparent outline-none text-lg" value="untitled.js" />
+<div class="flex gap-2">
+<button id="copyBtn" class="btn glass">Copy</button>
+<button id="downloadBtn" class="btn bg-blue-600 text-white">Download</button>
+</div>
+</div>
 
-        <div class="mt-4">
-          <label class="text-xs opacity-70">Templates</label>
-          <div class="mt-2 grid gap-2">
-            <button class="templateBtn py-1 px-2 rounded bg-slate-700">JS Template</button>
-            <button class="templateBtn py-1 px-2 rounded bg-slate-700">HTML Template</button>
-            <button class="templateBtn py-1 px-2 rounded bg-slate-700">CSS Template</button>
-            <button class="templateBtn py-1 px-2 rounded bg-slate-700">Python Template</button>
-            <button class="templateBtn py-1 px-2 rounded bg-slate-700">C++ Template</button>
-          </div>
-        </div>
+<div class="cm-container glass p-3">
+<textarea id="editor" style="display:none"></textarea>
+<div id="cmEditor"></div>
+</div>
 
-        <div class="mt-4 text-xs minor">
-          <div>Auto-save draft: <span id="autosaveStatus">On</span></div>
-          <div class="mt-2">Quick tips:</div>
-          <ul class="list-disc ml-4 mt-1">
-            <li>Upload file otomatis pilih bahasa.</li>
-            <li>Prettier digunakan untuk JS/HTML/CSS formatting.</li>
-            <li>Python/C++ auto-fix: heuristik sederhana.</li>
-          </ul>
-        </div>
-      </aside>
+<div class="flex gap-3 mt-2">
+<div class="flex-1 glass p-3">
+<div class="font-semibold">Analysis</div>
+<div id="analysis" class="mt-2 text-sm">Press "Check" to analyze.</div>
+</div>
+<div class="w-80 glass p-3">
+<div class="font-semibold">Issues</div>
+<div id="issues" class="mt-2 max-h-48 overflow-auto"></div>
+</div>
+</div>
 
-      <!-- Center: editor -->
-      <section class="flex-1 flex flex-col gap-4">
-        <div class="glass p-3 flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <input id="filename" class="bg-transparent outline-none text-lg" value="untitled.js" />
-            <div class="minor">— edit nama file sebelum download</div>
-          </div>
+<div class="status-bar glass mt-2" id="statusBar">
+<div id="cursorPos">Line 1, Col 1</div>
+<div id="issueCount">0 issues</div>
+<div id="autosave">Auto-save On</div>
+</div>
+</section>
+</main>
 
-          <div class="flex gap-2">
-            <button id="copyBtn" class="px-3 py-1 rounded bg-indigo-500">Copy</button>
-            <button id="downloadBtn" class="px-3 py-1 rounded bg-blue-600">Download</button>
-            <button id="previewBtn" class="px-3 py-1 rounded bg-sky-600">Preview</button>
-          </div>
-        </div>
-
-        <div class="cm-wrapper glass p-3">
-          <textarea id="editor" style="display:none"></textarea>
-          <div id="cmEditor"></div>
-        </div>
-
-        <div class="flex gap-3">
-          <div class="flex-1 glass p-3">
-            <div class="font-semibold">Analysis / Preview</div>
-            <div id="analysis" class="mt-2 text-sm max-h-48 overflow-auto minor">Tekan "Check" untuk analisa syntax & suggestions.</div>
-          </div>
-          <div class="w-80 glass p-3">
-            <div class="font-semibold">Issues</div>
-            <div id="issues" class="mt-2 text-sm max-h-48 overflow-auto"></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Right: stats / history -->
-      <aside class="w-80 glass p-4">
-        <div class="flex items-center justify-between">
-          <div class="font-semibold">Stats</div>
-          <div class="minor">local</div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-2 mt-3">
-          <div class="p-3 bg-slate-800 rounded text-center">
-            <div id="statChecks" class="text-2xl">0</div>
-            <div class="minor">Checks</div>
-          </div>
-          <div class="p-3 bg-slate-800 rounded text-center">
-            <div id="statFixes" class="text-2xl">0</div>
-            <div class="minor">AutoFixes</div>
-          </div>
-        </div>
-
-        <div class="mt-4">
-          <div class="font-semibold">History</div>
-          <ol id="history" class="mt-2 list-decimal ml-5 minor max-h-60 overflow-auto"></ol>
-        </div>
-      </aside>
-    </main>
-
-    <footer class="text-center minor p-4">© 2025 Ndraa Syntax • Built for modern syntax workflows</footer>
-  </div>
+<footer class="text-center minor p-4">© 2025 Ndraa Syntax Pro 2.1 — Single-file IDE</footer>
+</div>
 
 <script>
-/* ========= Init Editor (CodeMirror) ========= */
-const cm = CodeMirror(document.getElementById('cmEditor'), {
-  value: `// Selamat datang ke Ndraa Syntax\nconsole.log('Halo!');`,
-  mode: 'javascript',
-  theme: 'dracula',
-  lineNumbers: true,
-  matchBrackets: true,
-  tabSize: 2,
-  indentUnit: 2
+// Initialize CodeMirror
+const cm = CodeMirror(document.getElementById('cmEditor'),{
+  value:'console.log("Hello World");',
+  mode:'javascript',
+  theme:'dracula',
+  lineNumbers:true,
+  matchBrackets:true,
+  tabSize:2,
+  indentUnit:2
 });
 
-/* ========= State & refs ========= */
-let currentLang = 'javascript';
-let lastFixed = '';
-const langSelect = document.getElementById('langSelect');
-const filenameInput = document.getElementById('filename');
-const fileInput = document.getElementById('fileInput');
-const issuesDiv = document.getElementById('issues');
-const analysisDiv = document.getElementById('analysis');
-const statChecks = document.getElementById('statChecks');
-const statFixes = document.getElementById('statFixes');
-const historyOL = document.getElementById('history');
-const autosaveKey = 'ndraa_syntax_draft_v1';
+let currentLang='javascript';
+let lastFixed='';
+const langSelect=document.getElementById('langSelect');
+const fileInput=document.getElementById('fileInput');
+const filenameInput=document.getElementById('filename');
+const issuesDiv=document.getElementById('issues');
+const analysisDiv=document.getElementById('analysis');
+const autosaveSpan=document.getElementById('autosave');
+let autosaveKey='ndraa_syntax2_draft_v1';
 
-/* Helpers */
-function pushHistory(txt) {
-  const li = document.createElement('li');
-  li.textContent = `${new Date().toLocaleTimeString()} — ${txt}`;
-  historyOL.prepend(li);
-  if (historyOL.children.length > 200) historyOL.removeChild(historyOL.lastChild);
+function saveDraft(){
+  try{
+    localStorage.setItem(autosaveKey,JSON.stringify({
+      lang:currentLang,
+      filename:filenameInput.value||'untitled',
+      content:cm.getValue(),
+      ts:Date.now()
+    }));
+    autosaveSpan.textContent='Auto-save On';
+  }catch(e){autosaveSpan.textContent='Auto-save Err';}
 }
-function showAnalysis(msg) { analysisDiv.innerHTML = `<div class="minor">${escapeHtml(msg)}</div>`; }
-function showIssues(list) {
-  issuesDiv.innerHTML = '';
-  if (!list.length) { issuesDiv.innerHTML = '<div class="text-green-400">No issues found.</div>'; return; }
-  list.forEach(it=&gt;{
-    const el = document.createElement('div');
-    el.className = 'p-2 mb-2 rounded bg-slate-900';
-    el.innerHTML = `<div class="${it.severity==='warn' ? 'badge-warn' : 'badge-error'}">${escapeHtml(it.title)}</div>
-      <div class="minor mt-1">Line: ${it.line||'-'} ${it.col? 'Col: '+it.col : ''}</div>
-      <div class="mt-1">${escapeHtml(it.message || it.suggestion || '')}</div>
-      <div class="minor mt-1">Saran: ${escapeHtml(it.suggestion || 'Periksa baris yang disebut.')}</div>`;
+
+function loadDraft(){
+  try{
+    const raw=localStorage.getItem(autosaveKey);
+    if(!raw) return;
+    const p=JSON.parse(raw);
+    setMode(p.lang||'javascript');
+    filenameInput.value=p.filename||'untitled';
+    cm.setValue(p.content||'');
+  }catch(e){}
+}
+
+loadDraft();
+
+function setMode(lang){
+  currentLang=lang;
+  if(lang==='javascript') cm.setOption('mode','javascript');
+  else if(lang==='html') cm.setOption('mode','htmlmixed');
+  else if(lang==='css') cm.setOption('mode','css');
+  langSelect.value=lang;
+  saveDraft();
+}
+
+// Upload file
+fileInput.addEventListener('change', async(ev)=>{
+  const f=ev.target.files && ev.target.files[0];
+  if(!f) return;
+  filenameInput.value=f.name;
+  const text=await f.text();
+  cm.setValue(text);
+  const ext=f.name.split('.').pop().toLowerCase();
+  const map={js:'javascript',jsx:'javascript',html:'html',htm:'html',css:'css'};
+  setMode(map[ext]||'javascript');
+  analysisDiv.textContent='File loaded: '+f.name;
+});
+
+// Status bar cursor
+cm.on('cursorActivity',()=>{
+  const pos=cm.getCursor();
+  document.getElementById('cursorPos').textContent=`Line ${pos.line+1}, Col ${pos.ch+1}`;
+});
+
+// Analysis
+function analyzeCode(code, lang){
+  let issues=[];
+  if(lang==='javascript'){
+    try{esprima.parseScript(code,{tolerant:true,loc:true});}
+    catch(err){
+      issues.push({title:'JS Syntax Error',message:err.description||err.message,line:err.lineNumber,col:err.column,severity:'error'});
+    }
+  } else if(lang==='html'){
+    const result=HTMLHint.verify(code);
+    result.forEach(r=>{
+      issues.push({title:'HTML Issue',message:r.message,line:r.line,col:r.col,severity:r.type==='error'?'error':'warn'});
+    });
+  } else if(lang==='css'){
+    try{issues=window.stylelint?window.stylelint.lint({code}).results[0].warnings.map(w=>({title:'CSS Warning',message:w.text,line:w.line,col:w.column,severity:'warn'})) : [];}
+    catch(e){}
+  }
+  return issues;
+}
+
+function renderIssues(list){
+  issuesDiv.innerHTML='';
+  if(!list.length){
+    issuesDiv.innerHTML='<div class="text-green-400">No issues found.</div>';
+    document.getElementById('issueCount').textContent='0 issues';
+    return;
+  }
+  list.forEach(it=>{
+    const el=document.createElement('div');
+    el.className='p-2 mb-2 rounded bg-slate-900';
+    el.innerHTML=`<div class="${it.severity==='warn'?'issue-warn':'issue-error'} font-semibold">${it.title}</div>
+    <div class="text-sm mt-1">Line: ${it.line||'-'} ${it.col? 'Col:'+it.col:''}</div>
+    <div class="text-xs mt-1">${it.message}</div>`;
+    issuesDiv.appendChild(el);
+  });
+  document.getElementById('issueCount').textContent=list.length+' issue(s)';
+}
+
+// AutoFix / Format
+async function autoFix(code,lang){
+  let fixed=code;
+  try{
+    if(lang==='javascript') fixed=prettier.format(code,{parser:'babel',plugins:prettierPlugins});
+    else if(lang==='html') fixed=prettier.format(code,{parser:'html',plugins:prettierPlugins});
+    else if(lang==='css') fixed=prettier.format(code,{parser:'css',plugins:prettierPlugins});
+  }catch(e){analysisDiv.textContent='AutoFix error: '+e.message;}
+  return fixed;
+}
+
+// Buttons
+document.getElementById('checkBtn').addEventListener('click',()=>{
+  const code=cm.getValue();
+  const issues=analyzeCode(code,currentLang);
+  renderIssues(issues);
+  analysisDiv.textContent=issues.length?'Found '+issues.length+' issue(s)':'No issues detected';
+});
+
+document.getElementById('formatBtn').addEventListener('click', async()=>{
+  lastFixed=await autoFix(cm.getValue(),currentLang);
+  analysisDiv.textContent='AutoFix ready — click Apply Fix';
+});
+
+document.getElementById('applyFixBtn').addEventListener('click',()=>{
+  if(!lastFixed) return;
+  cm.setValue(lastFixed);
+  analysisDiv.textContent='Applied fix to editor';
+  saveDraft();
+});
+
+document.getElementById('copyBtn').addEventListener('click',async()=>{
+  try{
+    await navigator.clipboard.writeText(cm.getValue());
+    analysisDiv.textContent='Copied to clipboard';
+  }catch(e){analysisDiv.textContent='Copy failed: '+e.message;}
+});
+
+document.getElementById('downloadBtn').addEventListener('click',()=>{
+  const content=cm.getValue();
+  const name=filenameInput.value||'untitled';
+  const ext=name.includes('.')? name.split('.').pop():(currentLang==='javascript'?'js':currentLang==='html'?'html':'css');
+  const blob=new Blob([content],{type:'text/plain'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=name.includes('.')?name:`${name}.${ext}`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  analysisDiv.textContent='Downloaded: '+name;
+});
+
+langSelect.addEventListener('change',e=>setMode(e.target.value));
+setMode('javascript');
+</script>
+</body>
+</html>
+"minor mt-1">Saran: ${escapeHtml(it.suggestion || 'Periksa baris yang disebut.')}</div>`;
     issuesDiv.appendChild(el);
   });
 }
