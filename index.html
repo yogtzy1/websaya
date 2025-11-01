@@ -205,13 +205,231 @@ function showAnalysis(msg) { analysisDiv.innerHTML = `<div class="minor">${escap
 function showIssues(list) {
   issuesDiv.innerHTML = '';
   if (!list.length) { issuesDiv.innerHTML = '<div class="text-green-400">No issues found.</div>'; return; }
-  list.forEach(it=>{
+  list.forEach(it=&gt;{
     const el = document.createElement('div');
     el.className = 'p-2 mb-2 rounded bg-slate-900';
     el.innerHTML = `<div class="${it.severity==='warn' ? 'badge-warn' : 'badge-error'}">${escapeHtml(it.title)}</div>
       <div class="minor mt-1">Line: ${it.line||'-'} ${it.col? 'Col: '+it.col : ''}</div>
       <div class="mt-1">${escapeHtml(it.message || it.suggestion || '')}</div>
       <div class="minor mt-1">Saran: ${escapeHtml(it.suggestion || 'Periksa baris yang disebut.')}</div>`;
+    issuesDiv.appendChild(el);
+  });
+}
+function escapeHtml(s){ return (s||'').toString().replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function setMode(lang) {
+  currentLang = lang;
+  if (lang === 'javascript') cm.setOption('mode','javascript');
+  else if (lang === 'html') cm.setOption('mode','htmlmixed');
+  else if (lang === 'css') cm.setOption('mode','css');
+  else if (lang === 'python') cm.setOption('mode','python');
+  else if (lang === 'cpp') cm.setOption('mode','text/x-c++src');
+  langSelect.value = lang;
+  document.title = `Ndraa Syntax — ${lang.toUpperCase()}`;
+}
+
+/* ========= Auto-save (localStorage) ========= */
+function saveDraft() {
+  const payload = {
+    lang: currentLang,
+    filename: filenameInput.value || 'untitled',
+    content: cm.getValue(),
+    ts: Date.now()
+  };
+  try { localStorage.setItem(autosaveKey, JSON.stringify(payload)); document.getElementById('autosaveStatus').textContent = 'On'; }
+  catch(e) { document.getElementById('autosaveStatus').textContent = 'Err'; }
+}
+function loadDraft() {
+  try {
+    const raw = localStorage.getItem(autosaveKey);
+    if (!raw) return;
+    const p = JSON.parse(raw);
+    setMode(p.lang || 'javascript');
+    filenameInput.value = p.filename || 'untitled';
+    cm.setValue(p.content || '');
+    pushHistory('Loaded draft from localStorage');
+  } catch(e){}
+}
+/* save every 4 seconds while typing */
+let saveTimer = null;
+cm.on('change', ()=> {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveDraft, 1000 * 4);
+});
+
+/* load draft on init */
+loadDraft();
+
+/* ========= Upload file handling ========= */
+fileInput.addEventListener('change', async (ev)=>{
+  const files = Array.from(ev.target.files || []);
+  if (!files.length) return;
+  const f = files[0];
+  filenameInput.value = f.name;
+  const text = await f.text();
+  cm.setValue(text);
+  // detect by extension
+  const ext = f.name.split('.').pop().toLowerCase();
+  const mapping = { js:'javascript', jsx:'javascript', html:'html', htm:'html', css:'css', py:'python', c:'cpp', cpp:'cpp', h:'cpp' };
+  setMode(mapping[ext] || 'javascript');
+  pushHistory(`Uploaded ${f.name}`);
+});
+
+/* ========= Templates ========= */
+document.querySelectorAll('.templateBtn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const t = btn.textContent.trim();
+    if (t.includes('JS')) {
+      setMode('javascript'); filenameInput.value='template.js';
+      cm.setValue(`// JS Template\nfunction main(){\n  console.log("Hello from Ndraa Syntax");\n}\nmain();`);
+    } else if (t.includes('HTML')) {
+      setMode('html'); filenameInput.value='template.html';
+      cm.setValue(`<!doctype html>\n<html>\n  <head>\n    <meta charset="utf-8">\n    <title>Template</title>\n  </head>\n  <body>\n    <h1>Ndraa Syntax HTML Template</h1>\n  </body>\n</html>`);
+    } else if (t.includes('CSS')) {
+      setMode('css'); filenameInput.value='template.css';
+      cm.setValue(`/* CSS Template */\n:root{--accent:#7c3aed}\nbody{font-family:Inter,system-ui; background:#0b1220;color:#e6eef8}`);
+    } else if (t.includes('Python')) {
+      setMode('python'); filenameInput.value='template.py';
+      cm.setValue(`# Python template\nprint("Hello Ndraa Syntax")`);
+    } else if (t.includes('C++')) {
+      setMode('cpp'); filenameInput.value='template.cpp';
+      cm.setValue(`#include <iostream>\nusing namespace std;\nint main(){ cout << "Hello"; return 0; }`);
+    }
+    pushHistory(`Inserted ${t}`);
+  });
+});
+
+/* ========= Analysis / Lint (lightweight) ========= */
+async function analyze(code, lang) {
+  const issues = [];
+  try {
+    if (lang === 'javascript') {
+      try {
+        // try parse with esprima to catch syntax error
+        esprima.parseScript(code, { tolerant: true, loc: true });
+      } catch (err) {
+        issues.push({ title: 'SyntaxError (JS)', message: err.description || err.message, line: err.lineNumber, col: err.column, severity:'error', suggestion:'Periksa tanda kurung/quote/token sebelum lokasi.'});
+      }
+      // heuristics
+      if (code.includes('console,log')) issues.push({ title:'Typo', message:'console,log — kemungkinan maksud console.log', severity:'warn', suggestion:'Ganti menjadi console.log' });
+    } else if (lang === 'html') {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(code, 'text/html');
+      const errEl = doc.querySelector('parsererror');
+      if (errEl) issues.push({ title:'Malformed HTML', message: errEl.textContent.slice(0,300), severity:'error', suggestion:'Periksa tag yang terbuka/tertutup.'});
+    } else if (lang === 'css') {
+      const open = (code.match(/{/g)||[]).length;
+      const close = (code.match(/}/g)||[]).length;
+      if (open !== close) issues.push({ title:'Unmatched Braces (CSS)', message:`{ count=${open} } count=${close}`, severity:'error', suggestion:'Pastikan setiap { memiliki }.'});
+    } else if (lang === 'python') {
+      const lines = code.split('\n');
+      for (let i=0;i<lines.length;i++){
+        if (/^\t+/.test(lines[i])) { issues.push({ title:'Indentation (Python)', message:'Tab detected. Disarankan gunakan spasi (4).', line:i+1, severity:'warn', suggestion:'Ganti tab dengan 4 spasi.'}); break; }
+      }
+      // bracket / parenthesis basic
+      const openP = (code.match(/\(/g)||[]).length;
+      const closeP = (code.match(/\)/g)||[]).length;
+      if (openP !== closeP) issues.push({ title:'Parenthesis mismatch', message:`(=${openP} )=${closeP}`, severity:'warn', suggestion:'Periksa tanda kurung.'});
+    } else if (lang === 'cpp') {
+      const lines = code.split('\n');
+      let cnt=0;
+      for (let i=0;i<lines.length && cnt<15;i++){
+        const ln = lines[i].trim();
+        if (!ln) continue;
+        if (/^(#|\/\/|\/\*|\*|\}|\{)/.test(ln)) continue;
+        if (!/;$/.test(ln) && !/\)$/.test(ln) && !/^\b(if|for|while|switch|class|struct|template|namespace)\b/.test(ln)) {
+          issues.push({ title:'Possible missing semicolon', line:i+1, message:'Baris ini mungkin butuh ; di akhir', severity:'warn', suggestion:'Tambahkan ; jika pernyataan ekspresi.'});
+          cnt++;
+        }
+      }
+    }
+  } catch (e) {
+    issues.push({ title:'Analyzer Error', message: e.message, severity:'error' });
+  }
+  return issues;
+}
+
+/* ========= Auto-fix (Prettier for js/html/css; heuristics for py/cpp) ========= */
+async function autoFix(code, lang) {
+  let fixed = code;
+  const messages = [];
+  let fixesApplied = 0;
+  try {
+    if (lang === 'javascript') {
+      fixed = prettier.format(code, { parser: "babel", plugins: prettierPlugins });
+      messages.push('Prettier applied (babel).');
+      fixesApplied++;
+    } else if (lang === 'html') {
+      fixed = prettier.format(code, { parser: "html", plugins: prettierPlugins });
+      messages.push('Prettier applied (html).');
+      fixesApplied++;
+    } else if (lang === 'css') {
+      fixed = prettier.format(code, { parser: "css", plugins: prettierPlugins });
+      messages.push('Prettier applied (css).');
+      fixesApplied++;
+    } else if (lang === 'python') {
+      // heuristics: tabs -> 4 spaces; trim trailing; basic parentheses balancing
+      fixed = code.split('\n').map(l=>l.replace(/\t/g,'    ').replace(/\s+$/,'')).join('\n');
+      messages.push('Tabs converted to 4 spaces; trailing spaces trimmed.');
+      fixesApplied++;
+      const open = (fixed.match(/\(/g)||[]).length;
+      const close = (fixed.match(/\)/g)||[]).length;
+      if (open > close) { fixed += '\n' + ')'.repeat(open - close); messages.push('Attempted to close extra parentheses.'); fixesApplied++; }
+    } else if (lang === 'cpp') {
+      // heuristic semicolon insertion for likely statements
+      const lines = fixed.split('\n');
+      let cnt = 0;
+      for (let i=0;i<lines.length;i++){
+        const raw = lines[i];
+        const ln = raw.trim();
+        if (!ln) continue;
+        if (/^(#|\/\/|\/\*|\*|\}|\{)/.test(ln)) continue;
+        if (/;$/.test(ln)) continue;
+        if (!/\)$/.test(ln) && !/;|{|}$/.test(ln) && !/^\b(if|for|while|switch|class|struct|template|namespace)\b/.test(ln)) {
+          lines[i] = raw + ';'; cnt++; if (cnt > 200) break;
+        }
+      }
+      fixed = lines.join('\n');
+      if (cnt) { messages.push(`Inserted ${cnt} semicolon(s) heuristically.`); fixesApplied += cnt; }
+    }
+  } catch (e) {
+    messages.push('AutoFix error: ' + e.message);
+  }
+  return { fixed, fixesApplied, messages };
+}
+
+/* ========= Button behaviours ========= */
+document.getElementById('checkBtn').addEventListener('click', async ()=>{
+  const code = cm.getValue();
+  const list = await analyze(code, currentLang);
+  showIssues(list);
+  showAnalysis(list.length ? `${list.length} issue(s) found` : 'No issues. Looks good!');
+  statChecks.textContent = String(Number(statChecks.textContent||0) + 1);
+  pushHistory(`Check (${currentLang}) — ${list.length} issues`);
+});
+
+document.getElementById('formatBtn').addEventListener('click', async ()=>{
+  const code = cm.getValue();
+  const res = await autoFix(code, currentLang);
+  lastFixed = res.fixed;
+  let msg = `AutoFix done — changes: ${res.fixesApplied}. ${res.messages.join(' • ')}`;
+  showAnalysis(msg);
+  // preview fixed snippet
+  showIssues([]); // clear issues temporarily
+  const pre = document.createElement('pre'); pre.className='minor mt-2'; pre.textContent = res.fixed.slice(0, 10000);
+  analysisDiv.innerHTML = ''; analysisDiv.appendChild(document.createTextNode(msg)); analysisDiv.appendChild(pre);
+  statFixes.textContent = String(Number(statFixes.textContent||0) + (res.fixesApplied ? 1 : 0));
+  pushHistory(`AutoFix (${currentLang}) — ${res.fixesApplied} changes`);
+});
+
+document.getElementById('applyFixBtn').addEventListener('click', ()=>{
+  if (!lastFixed) { showAnalysis('No fixed result — run Auto Fix first.'); return; }
+  cm.setValue(lastFixed);
+  saveDraft();
+  pushHistory('Applied fix to editor');
+  showAnalysis('Fix applied to editor.');
+});
+
+documnor mt-1">Saran: ${escapeHtml(it.suggestion || 'Periksa baris yang disebut.')}</div>`;
     issuesDiv.appendChild(el);
   });
 }
